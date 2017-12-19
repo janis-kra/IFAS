@@ -1,0 +1,2 @@
+# see https://www.elastic.co/guide/en/kibana/6.1/settings.html
+elasticsearch.url: http://elasticsearch:9200
