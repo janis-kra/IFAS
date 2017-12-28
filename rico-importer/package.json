@@ -1,0 +1,16 @@
+{
+  "name": "rico-importer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Janis Krasemann <krasemann.janis@gmail.com> (http://www.github.com/janis-kra)",
+  "license": "MIT",
+  "dependencies": {
+    "fast-csv": "^2.4.1",
+    "got": "^8.0.1"
+  }
+}
