@@ -9,7 +9,9 @@ const options = {
 }
 
 var req = request(options).auth('admin', 'changeit', false);
-var feedparser = new FeedParser();
+var feedparser = new FeedParser({
+  normalize: false
+});
 
 req.on('error', function (error) {
   console.error(error)
@@ -30,6 +32,11 @@ feedparser.on('error', function (error) {
   console.error(error)
 });
 
+feedparser.on('meta', function (meta) {
+  console.log('===== %s =====', JSON.stringify(meta));
+})
+
+let counter = 0;
 feedparser.on('readable', function () {
   // This is where the action is!
   var stream = this; // `this` is `feedparser`, which is a stream
@@ -37,6 +44,22 @@ feedparser.on('readable', function () {
   var item;
 
   while (item = stream.read()) {
+    counter++;
+    console.log(counter + ': ' + item['atom:id']['#']);
+    
     console.log(item);
+    /*
+      curl -XPUT 'localhost:9200/twitter/tweet/1?pretty' -H 'Content-Type: application/json' -d'
+{
+    "user" : "kimchy",
+    "post_date" : "2009-11-15T14:12:12",
+    "message" : "trying out Elasticsearch"
+}
+'
+
+    */
+    // request.put({
+    //   url: 'localhost:9200/streams'
+    // })
   }
 });
