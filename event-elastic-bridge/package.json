@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "feedparser": "^2.2.7",
+    "got": "^8.0.1",
     "iconv": "^2.3.0",
     "request": "^2.83.0",
     "zlib": "^1.0.5"
