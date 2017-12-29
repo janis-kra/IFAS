@@ -1,4 +1,4 @@
-var FeedParser = require("feedparser");
+const FeedParser = require("feedparser");
 const got = require("got");
 
 const options = {
@@ -8,44 +8,70 @@ const options = {
   auth: "admin:changeit"
 };
 
+function initFeedparser (resolve, reject, rel) {
+  const feedparser = new FeedParser({
+    normalize: false
+  });
+
+  feedparser.on("error", function(error) {
+    reject(error);
+  });
+
+  feedparser.on("meta", function(meta) {
+    if (meta["atom:link"]) {
+      const links = meta["atom:link"].map(link => link["@"]);
+      let href;
+      links.forEach(link => {
+        if (link.rel === rel) {
+          last = link.href;
+        }
+      });
+      resolve(last);
+    } else {
+      resolve();
+    }
+  });
+
+  return feedparser;
+}
+
+async function fetchLastPage(url) {
+  return new Promise((resolve, reject) => {
+    const feedparser = initFeedparser(resolve, reject, "last");
+    got.stream(url, options).pipe(feedparser);
+  });
+}
+
 async function read(url) {
   return new Promise((resolve, reject) => {
-    var feedparser = new FeedParser({
-      normalize: false
-    });
+    const feedparser = initFeedparser(resolve, reject, "previous");
 
-    feedparser.on("error", function(error) {
-      reject(error);
-    });
+    feedparser.on("readable", function() {
+      const parser = this; // `this` is `feedparser`, which is a stream
+      const meta = this.meta; // **NOTE** the "meta" is always available in the context of the feedparser instance
+      const output = process.stdout; // TODO: Change to got.stream('localhost:9200/streams', ...) --> Elasticsearch
 
-    feedparser.on("meta", function(meta) {
-      // console.log(JSON.stringify(meta));
-      debugger;
-      if (meta["atom:link"]) {
-        const links = meta["atom:link"].map(link => link["@"]);
-        let next;
-        links.forEach(link => {
-          if (link.rel === "next") {
-            next = link.href;
-          }
-        });
-        resolve(next);
-      } else {
-        resolve();
-      }
+      parser.stream.pipe(output); // parser.stream is the nodejs stream.Duplex and thus stream.Readable
     });
 
     got.stream(url, options).pipe(feedparser);
   });
 }
 
-(async () => {
-  let url = "http://localhost:2113/streams/ui-data";
-  while (url) {
-    console.log(url);
-    url = await read(url);
+async function readUiData () {
+  const startUrl = "http://localhost:2113/streams/ui-data";
+  let url = await fetchLastPage(startUrl);
+  const count = Number.MAX_SAFE_INTEGER;
+  for (let i = 0; i < count && url; i++) {
+    try {
+      url = await read(url);
+    } catch (error) {
+      console.error(error);
+    }
   }
-})();
+};
+
+readUiData();
 
 // var req = request(options).auth("admin", "changeit", false);
 
