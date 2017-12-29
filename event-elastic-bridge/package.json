@@ -10,6 +10,7 @@
   "author": "Janis Krasemann <krasemann.janis@gmail.com> (http://www.github.com/janis-kra)",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^4.0.0",
     "feedparser": "^2.2.7",
     "got": "^8.0.1",
     "iconv": "^2.3.0",

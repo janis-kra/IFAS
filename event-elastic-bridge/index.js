@@ -1,11 +1,13 @@
 const FeedParser = require("feedparser");
 const got = require("got");
 
+require('dotenv').config();
+
 const options = {
   headers: {
     Accept: "application/atom+xml"
   },
-  auth: "admin:changeit"
+  auth: `${process.env.user}:${process.env.pw}`
 };
 
 function initFeedparser (resolve, reject, rel) {
