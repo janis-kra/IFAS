@@ -1,7 +1,7 @@
 const FeedParser = require("feedparser");
 const got = require("got");
 
-require('dotenv').config();
+require("dotenv").config();
 
 const options = {
   headers: {
@@ -10,7 +10,7 @@ const options = {
   auth: `${process.env.user}:${process.env.pw}`
 };
 
-function initFeedparser (resolve, reject, rel) {
+function initFeedparser(resolve, reject, rel) {
   const feedparser = new FeedParser({
     normalize: false
   });
@@ -60,7 +60,7 @@ async function read(url) {
   });
 }
 
-async function readUiData () {
+async function readUiData() {
   const startUrl = "http://localhost:2113/streams/ui-data";
   let url = await fetchLastPage(startUrl);
   const count = Number.MAX_SAFE_INTEGER;
@@ -71,7 +71,7 @@ async function readUiData () {
       console.error(error);
     }
   }
-};
+}
 
 readUiData();
 
