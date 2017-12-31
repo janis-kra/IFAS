@@ -1,18 +1,27 @@
 const FeedParser = require("feedparser");
 const got = require("got");
+const convert = require("xml-js");
 
 require("dotenv").config();
 
-const options = {
+const optionsAcceptAtomXml = {
   headers: {
     Accept: "application/atom+xml"
-  },
+  }
+};
+const optionsAcceptJSON = {
+  headers: {
+    Accept: "application/json"
+  }
+};
+const optionsAuth = {
   auth: `${process.env.user}:${process.env.pw}`
 };
+const optionsContentJSON = { headers: { "Content-Type": "application/json" } };
 
 function initFeedparser(resolve, reject, rel) {
   const feedparser = new FeedParser({
-    normalize: false
+    normalize: true
   });
 
   feedparser.on("error", function(error) {
@@ -40,7 +49,9 @@ function initFeedparser(resolve, reject, rel) {
 async function fetchLastPage(url) {
   return new Promise((resolve, reject) => {
     const feedparser = initFeedparser(resolve, reject, "last");
-    got.stream(url, options).pipe(feedparser);
+    got
+      .stream(url, { ...optionsAcceptAtomXml, ...optionsAuth })
+      .pipe(feedparser);
   });
 }
 
@@ -51,19 +62,48 @@ async function read(url) {
     feedparser.on("readable", function() {
       const parser = this; // `this` is `feedparser`, which is a stream
       const meta = this.meta; // **NOTE** the "meta" is always available in the context of the feedparser instance
-      const output = process.stdout; // TODO: Change to got.stream('localhost:9200/streams', ...) --> Elasticsearch
+      const links = [];
+      const getOptions = {
+        ...optionsAcceptJSON,
+        ...optionsAuth
+      };
+      const ouptput = process.stdout;
 
-      parser.stream.pipe(output); // parser.stream is the nodejs stream.Duplex and thus stream.Readable
+      while ((item = parser.read())) {
+        /*
+        curl -XPOST 'localhost:9200/twitter/tweet/?pretty' -H 'Content-Type: application/json' -d'
+{
+    "user" : "kimchy",
+    "post_date" : "2009-11-15T14:12:12",
+    "message" : "trying out Elasticsearch"
+}
+'
+
+        */
+        const guid = item.guid;
+        const link = item.link;
+        const output = got.stream
+          .post("http://localhost:9200/ui-data/data/?pretty", {
+            headers: {
+              ...optionsContentJSON.headers,
+              ...optionsAcceptJSON.headers
+            }
+          })
+          .on("response", response => console.log(`uploaded ${response}`))
+          .on("error", (err, body, res) => console.error(err));
+        // const outpput = got.stream.post('localhost:9200/twitter/tweet/?pretty', {headers:'Content-Type: application/json'})
+        got.stream(item.link, getOptions).pipe(output);
+      }
     });
 
-    got.stream(url, options).pipe(feedparser);
+    got.stream(url, optionsAcceptAtomXml).pipe(feedparser);
   });
 }
 
 async function readUiData() {
   const startUrl = "http://localhost:2113/streams/ui-data";
   let url = await fetchLastPage(startUrl);
-  const count = Number.MAX_SAFE_INTEGER;
+  const count = 1; //Number.MAX_SAFE_INTEGER;
   for (let i = 0; i < count && url; i++) {
     try {
       url = await read(url);
