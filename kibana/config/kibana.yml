@@ -1,2 +1,9 @@
 # see https://www.elastic.co/guide/en/kibana/6.1/settings.html
+# retain default settings, see https://www.elastic.co/guide/en/kibana/current/_configuring_kibana_on_docker.html#_configuring_kibana_on_docker
 elasticsearch.url: http://elasticsearch:9200
+server.host: "0"
+server.name: kibana
+
+elasticsearch.username: elastic
+elasticsearch.password: changeme
+xpack.monitoring.ui.container.elasticsearch.enabled: true 
