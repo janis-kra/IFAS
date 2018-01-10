@@ -11,6 +11,7 @@
   "author": "Janis Krasemann <krasemann.janis@gmail.com> (http://www.github.com/janis-kra)",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^4.0.0",
     "fast-csv": "^2.4.1",
     "got": "^8.0.1"
   }

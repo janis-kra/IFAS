@@ -2,28 +2,36 @@ const csv = require("fast-csv");
 const fs = require("fs");
 const got = require("got");
 
-const url = "http://localhost:2113/streams/ui-data";
+require("dotenv").config();
+
+const url = `http://localhost:2113/streams/${process.env.INDEX}`;
 
 /* UI DETAILS */
 
 (function() {
-  const file = "data/ui_details-small.csv";
+  let i = 0;
+  const file = `data/${process.env.INDEX}.csv`;
   const csvStream = csv({ headers: true })
     .on("data", function(data) {
-      got.post(
-        url,
-        {
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-            "ES-EventType": "UIData-Created"
-          }
-        },
-        res => console.log(`Posted data: ${data["UI Number"]}`)
-      );
+      if (i < Number.parseInt(process.env.LIMIT)) {
+        got.post(
+          url,
+          {
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json",
+              "ES-EventType": `${process.env.INDEX}-created`
+            }
+          },
+          res => console.log(`Posted data: ${data}`)
+        );
+        i++;
+      }
     })
     .on("end", function() {
-      console.log(`Done posting all data from ${file} to event store at ${url}`);
+      console.log(
+        `Done posting ${i} lines from ${file} to event store at ${url}`
+      );
     });
 
   const fileStream = fs.createReadStream(file);
