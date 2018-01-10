@@ -6,4 +6,4 @@ server.name: kibana
 
 elasticsearch.username: elastic
 elasticsearch.password: changeme
-xpack.monitoring.ui.container.elasticsearch.enabled: true 
+xpack.security.enabled: false

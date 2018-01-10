@@ -1,0 +1,6 @@
+cluster.name: "docker-cluster"
+bootstrap.memory_lock: true
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+xpack.security.enabled: false
+network.host: "0.0.0.0"

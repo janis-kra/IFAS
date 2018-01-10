@@ -1,6 +1,5 @@
 const FeedParser = require("feedparser");
 const got = require("got");
-const convert = require("xml-js");
 
 require("dotenv").config();
 
