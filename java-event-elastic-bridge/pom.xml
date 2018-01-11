@@ -118,7 +118,7 @@
 						</argument>
 						<classpath />
 						<argument>
-							de.janiskrasemann.eventelasticbridge.ReadEventExample
+							de.janiskrasemann.eventelasticbridge.SubscribeToAllExample
 						</argument>
 					</arguments>
 				</configuration>
