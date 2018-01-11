@@ -1,4 +1,4 @@
-package de.janiskrasemann.event-elastic-bridge;
+package de.janiskrasemann.eventelasticbridge;
 
 /**
  * Hello world!
