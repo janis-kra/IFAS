@@ -82,7 +82,7 @@ async function read(url) {
         const guid = item.guid;
         const link = item.link;
         const output = got.stream
-          .post("http://localhost:9200/ui-data/data/?pretty", {
+          .post(`http://localhost:9200/${process.env.INDEX}/data/?pretty`, {
             headers: {
               ...optionsContentJSON.headers,
               ...optionsAcceptJSON.headers
@@ -92,6 +92,11 @@ async function read(url) {
           .on("error", (err, body, res) => console.error(err));
         // const outpput = got.stream.post('localhost:9200/twitter/tweet/?pretty', {headers:'Content-Type: application/json'})
         got.stream(item.link, getOptions).pipe(output);
+        /*
+         * TODO:
+         * - Does not terminate!
+         * - What about duplicates?
+         */
       }
     });
 
@@ -100,9 +105,9 @@ async function read(url) {
 }
 
 async function readUiData() {
-  const startUrl = "http://localhost:2113/streams/ui-data";
+  const startUrl = `http://localhost:2113/streams/${process.env.INDEX}`;
   let url = await fetchLastPage(startUrl);
-  const count = 1; //Number.MAX_SAFE_INTEGER;
+  const count = Number.MAX_SAFE_INTEGER;
   for (let i = 0; i < count && url; i++) {
     try {
       url = await read(url);
