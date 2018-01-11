@@ -15,7 +15,7 @@ public class ReadEventExample {
     public static void main(String[] args) {
         final ActorSystem system = ActorSystem.create();
         final Settings settings = new SettingsBuilder()
-                .address(new InetSocketAddress("127.0.0.1", 2113))
+                .address(new InetSocketAddress("127.0.0.1", 1113))
                 .defaultCredentials("admin", "changeit")
                 .build();
         final ActorRef connection = system.actorOf(ConnectionActor.getProps(settings));
@@ -46,7 +46,7 @@ public class ReadEventExample {
             } else
                 unhandled(message);
 
-            context().system().shutdown();
+            context().system().terminate();
         }
     }
 }
