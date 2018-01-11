@@ -1,8 +1,8 @@
 package de.janiskrasemann.eventelasticbridge;
 
 import akka.actor.ActorSystem;
+import eventstore.Content;
 import eventstore.Event;
-import eventstore.IndexedEvent;
 import eventstore.Settings;
 import eventstore.SubscriptionObserver;
 import eventstore.j.EsConnection;
@@ -11,6 +11,7 @@ import eventstore.j.SettingsBuilder;
 
 import java.io.Closeable;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class SubscribeToAllExample {
     public static void main(String[] args) {
@@ -32,7 +33,10 @@ public class SubscribeToAllExample {
 
           @Override
           public void onEvent(Event event, Closeable subscription) {
-              system.log().info(event.toString());
+            Content content = event.record().data().data();
+            byte[] bytes = content.value().toArray();
+            String eventData = new String(bytes, StandardCharsets.UTF_8);
+            system.log().info(eventData);
           }
 
           @Override
