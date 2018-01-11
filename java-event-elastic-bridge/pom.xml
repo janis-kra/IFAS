@@ -14,5 +14,10 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>com.geteventstore</groupId>
+        <artifactId>eventstore-client_2.11</artifactId>
+        <version>5.0.1</version>
+    </dependency>
   </dependencies>
 </project>
