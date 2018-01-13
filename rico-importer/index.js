@@ -10,10 +10,11 @@ const url = `http://localhost:2113/streams/${process.env.INDEX}`;
 
 (function() {
   let i = 0;
+  const limit = Number.parseInt(process.env.LIMIT) || Number.MAX_SAFE_INTEGER;
   const file = `data/${process.env.INDEX}.csv`;
   const csvStream = csv({ headers: true })
     .on("data", function(data) {
-      if (i < Number.parseInt(process.env.LIMIT)) {
+      if (i < limit) {
         got.post(
           url,
           {
