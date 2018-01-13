@@ -33,6 +33,7 @@ const url = `http://localhost:2113/streams/${process.env.INDEX}`;
       console.log(
         `Done posting ${i} lines from ${file} to event store at ${url}`
       );
+      csvStream.end();
     });
 
   const fileStream = fs.createReadStream(file);
