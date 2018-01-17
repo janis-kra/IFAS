@@ -24,26 +24,21 @@ namespace dotnet_event_elastic_bridge
     */
     class Program
     {
-        const string STREAM = "analytics";
         const string GROUP = "analytics";
         const int DEFAULTPORT = 1113;
 
         static void Main(string[] args)
         {
+            string stream = Environment.GetEnvironmentVariable("INDEX") ?? "analytics";
             var client = new HttpClient();
-            var uri = "http://localhost:9200/" + STREAM + "/data/?pretty";
+            var uri = "http://localhost:9200/" + stream + "/data/?pretty";
             //uncommet to enable verbose logging in client.
             var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
             using (var conn = EventStoreConnection.Create(settings, new IPEndPoint(IPAddress.Loopback, DEFAULTPORT)))
             {
                 conn.ConnectAsync().Wait();
 
-                //Normally the creating of the subscription group is not done in your general executable code. 
-                //Instead it is normally done as a step during an install or as an admin task when setting 
-                //things up. You should assume the subscription exists in your code.
-                // CreateSubscription(conn);
-
-                conn.ConnectToPersistentSubscription(STREAM, GROUP, (_, x) =>
+                conn.ConnectToPersistentSubscription(stream, GROUP, (_, x) =>
                 {
                     var data = Encoding.ASCII.GetString(x.Event.Data);
                     Console.WriteLine("Received: " + x.Event.EventStreamId + ":" + x.Event.EventNumber);
@@ -53,26 +48,6 @@ namespace dotnet_event_elastic_bridge
 
                 Console.WriteLine("waiting for events. press enter to exit");
                 Console.ReadLine();
-            }
-        }
-
-        private static void CreateSubscription(IEventStoreConnection conn)
-        {
-            PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
-                .DoNotResolveLinkTos()
-                .StartFromCurrent();
-
-            try
-            {
-                conn.CreatePersistentSubscriptionAsync(STREAM, GROUP, settings, new UserCredentials("admin", "changeit")).Wait();
-            }
-            catch (AggregateException ex)
-            {
-                if (ex.InnerException.GetType() != typeof(InvalidOperationException)
-                    && ex.InnerException?.Message != $"Subscription group {GROUP} on stream {STREAM} already exists")
-                {
-                    throw;
-                }
             }
         }
     }

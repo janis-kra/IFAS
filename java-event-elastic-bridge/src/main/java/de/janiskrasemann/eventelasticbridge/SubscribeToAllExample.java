@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 public class SubscribeToAllExample {
     public static void main(String[] args) {
         final String streamName = System.getenv("STREAM_NAME");
+        System.out.println(streamName);
         final String pw = System.getenv("PW");
         final String user = System.getenv("USER");
 
@@ -44,7 +45,7 @@ public class SubscribeToAllExample {
             String eventData = new String(bytes, StandardCharsets.UTF_8);
             system.log().info(eventData);
             try {
-              post("http://localhost:9200/ui-data/data/?pretty", eventData); 
+              post("http://localhost:9200/" + streamName + "/data/?pretty", eventData); 
             } catch (IOException e) {
               System.err.println(e.toString());
             }
