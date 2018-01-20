@@ -37,6 +37,17 @@ services:
       - cluster.name=docker-cluster
     networks:
       - esnet
+  evt-es-bridge:
+    build: java-event-elastic-bridge
+    container_name: evt-es-bridge
+    environment:
+      - STREAM_NAME=analytics
+      - STREAM_URL=eventstore
+      - ELASTIC_URL=elasticsearch
+      - USER=admin
+      - PW=changeit
+    networks:
+      - esnet
 volumes:
   elasticdata:
     driver: local

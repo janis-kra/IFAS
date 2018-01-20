@@ -25,10 +25,12 @@ public class SubscribeToAllExample {
         System.out.println(streamName);
         final String pw = System.getenv("PW");
         final String user = System.getenv("USER");
+        final String streamUrl = System.getenv("STREAM_URL");
+        final String elasticUrl = System.getenv("ELASTIC_URL");
 
         final ActorSystem system = ActorSystem.create();
         final Settings settings = new SettingsBuilder()
-                .address(new InetSocketAddress("127.0.0.1", 1113))
+                .address(new InetSocketAddress(streamUrl, 1113))
                 .defaultCredentials(user, pw)
                 .build();
         final EsConnection connection = EsConnectionFactory.create(system, settings);
@@ -45,9 +47,9 @@ public class SubscribeToAllExample {
             String eventData = new String(bytes, StandardCharsets.UTF_8);
             system.log().info(eventData);
             try {
-              post("http://localhost:9200/" + streamName + "/data/?pretty", eventData); 
+              post("http://" + elasticUrl + ":9200" + "/" + streamName + "/data/?pretty", eventData); 
             } catch (IOException e) {
-              System.err.println(e.toString());
+              onError(e);
             }
           }
 
