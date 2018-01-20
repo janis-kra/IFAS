@@ -1,5 +1,12 @@
 version: "3.4"
 services:
+  client:
+    build: client/
+    container_name: client
+    ports:
+      - 8000:80
+    networks:
+      - esnet
   eventstore:
     build: eventstore/
     container_name: eventstore
