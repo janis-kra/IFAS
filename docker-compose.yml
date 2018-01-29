@@ -50,7 +50,8 @@ services:
     environment:
       - STREAM_NAME=analytics
       - STREAM_URL=eventstore
-      - ELASTIC_URL=elasticsearch
+      - ELASTIC_NAME=elasticsearch
+      - EVENTSTORE_NAME=eventstore
       - USER=admin
       - PW=changeit
     networks:

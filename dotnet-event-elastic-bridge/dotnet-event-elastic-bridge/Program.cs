@@ -30,21 +30,24 @@ namespace dotnet_event_elastic_bridge
     static void Main(string[] args)
     {
 
-      TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
-      Task<string> t = tsc.Task;
-      Task.Factory.StartNew(() =>
+      string stream = Environment.GetEnvironmentVariable("INDEX") ?? "analytics";
+      var elasticsearchName = Environment.GetEnvironmentVariable("ELASTIC_NAME") ?? "localhost";
+      var eventstoreName = Environment.GetEnvironmentVariable("EVENTSTORE_NAME") ?? "localhost";
+      var client = new HttpClient();
+      var uri = "http://" + elasticsearchName + ":9200/" + stream + "/data/?pretty";
+      //uncommet to enable verbose logging in client.
+      var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
+      var address = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
+      using (var conn = EventStoreConnection.Create(settings, address))
       {
-        string stream = Environment.GetEnvironmentVariable("INDEX") ?? "analytics";
-        var client = new HttpClient();
-        var uri = "http://localhost:9200/" + stream + "/data/?pretty";
-        //uncommet to enable verbose logging in client.
-        var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
-        try
-        {
-          using (var conn = EventStoreConnection.Create(settings, new IPEndPoint(IPAddress.Loopback, DEFAULTPORT)))
-          {
-            conn.ConnectAsync().Wait();
+        conn.ConnectAsync().Wait();
 
+        TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
+        Task<string> t = tsc.Task;
+        Task.Factory.StartNew(() =>
+        {
+          try
+          {
             var sub = conn.ConnectToPersistentSubscription(stream, GROUP, (_, x) =>
             {
               var data = Encoding.ASCII.GetString(x.Event.Data);
@@ -52,19 +55,20 @@ namespace dotnet_event_elastic_bridge
               Console.WriteLine(data);
               client.PostAsync(uri, new StringContent(data, Encoding.UTF8, "application/json"));
             });
-            Console.WriteLine("waiting for events. press enter to exit");
-            Console.ReadLine();
-            // does not work when Console.ReadLine() is commented out
-            tsc.SetResult("ok");
-          }
-        }
-        catch (System.Exception e)
-        {
-          tsc.SetResult(e.Message);
-        }
 
-      });
-      Console.WriteLine("Result: " + t.Result);
+            // does not work when Console.ReadLine() and tsc.SetResult is commented out
+            Console.WriteLine("waiting for events.");
+            // Console.ReadLine();
+            // tsc.SetResult("ok");
+          }
+          catch (System.Exception e)
+          {
+            tsc.SetResult(e.Message);
+          }
+        });
+
+        Console.WriteLine("Result: " + t.Result);
+      }
     }
   }
 }
