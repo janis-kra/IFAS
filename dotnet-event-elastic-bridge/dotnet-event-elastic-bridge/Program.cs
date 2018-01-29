@@ -11,44 +11,60 @@ using Newtonsoft.Json;
 
 namespace dotnet_event_elastic_bridge
 {
-    /*
-    * This example sets up a volatile subscription to a test stream.
-    * 
-    * As written it will use the default ipaddress (loopback) and the default tcp port 1113 of the event
-    * store. In order to run the application bring up the event store in another window (you can use
-    * default arguments eg EventStore.ClusterNode.exe) then you can run this application with it. Once 
-    * this program is running you can run the WritingEvents sample to write some events to the stream
-    * and they will appear over the catch up subscription. You can also run many concurrent instances of this
-    * program and each will receive the events over the subscription.
-    * 
-    */
-    class Program
+  /*
+  * This example sets up a volatile subscription to a test stream.
+  * 
+  * As written it will use the default ipaddress (loopback) and the default tcp port 1113 of the event
+  * store. In order to run the application bring up the event store in another window (you can use
+  * default arguments eg EventStore.ClusterNode.exe) then you can run this application with it. Once 
+  * this program is running you can run the WritingEvents sample to write some events to the stream
+  * and they will appear over the catch up subscription. You can also run many concurrent instances of this
+  * program and each will receive the events over the subscription.
+  * 
+  */
+  class Program
+  {
+    const string GROUP = "analytics";
+    const int DEFAULTPORT = 1113;
+
+    static void Main(string[] args)
     {
-        const string GROUP = "analytics";
-        const int DEFAULTPORT = 1113;
 
-        static void Main(string[] args)
+      TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
+      Task<string> t = tsc.Task;
+      Task.Factory.StartNew(() =>
+      {
+        string stream = Environment.GetEnvironmentVariable("INDEX") ?? "analytics";
+        var client = new HttpClient();
+        var uri = "http://localhost:9200/" + stream + "/data/?pretty";
+        //uncommet to enable verbose logging in client.
+        var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
+        try
         {
-            string stream = Environment.GetEnvironmentVariable("INDEX") ?? "analytics";
-            var client = new HttpClient();
-            var uri = "http://localhost:9200/" + stream + "/data/?pretty";
-            //uncommet to enable verbose logging in client.
-            var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
-            using (var conn = EventStoreConnection.Create(settings, new IPEndPoint(IPAddress.Loopback, DEFAULTPORT)))
+          using (var conn = EventStoreConnection.Create(settings, new IPEndPoint(IPAddress.Loopback, DEFAULTPORT)))
+          {
+            conn.ConnectAsync().Wait();
+
+            var sub = conn.ConnectToPersistentSubscription(stream, GROUP, (_, x) =>
             {
-                conn.ConnectAsync().Wait();
-
-                conn.ConnectToPersistentSubscription(stream, GROUP, (_, x) =>
-                {
-                    var data = Encoding.ASCII.GetString(x.Event.Data);
-                    Console.WriteLine("Received: " + x.Event.EventStreamId + ":" + x.Event.EventNumber);
-                    Console.WriteLine(data);
-                    client.PostAsync(uri, new StringContent(data, Encoding.UTF8, "application/json"));
-                });
-
-                Console.WriteLine("waiting for events. press enter to exit");
-                Console.ReadLine();
-            }
+              var data = Encoding.ASCII.GetString(x.Event.Data);
+              Console.WriteLine("Received: " + x.Event.EventStreamId + ":" + x.Event.EventNumber);
+              Console.WriteLine(data);
+              client.PostAsync(uri, new StringContent(data, Encoding.UTF8, "application/json"));
+            });
+            Console.WriteLine("waiting for events. press enter to exit");
+            Console.ReadLine();
+            // does not work when Console.ReadLine() is commented out
+            tsc.SetResult("ok");
+          }
         }
+        catch (System.Exception e)
+        {
+          tsc.SetResult(e.Message);
+        }
+
+      });
+      Console.WriteLine("Result: " + t.Result);
     }
+  }
 }
