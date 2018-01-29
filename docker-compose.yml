@@ -45,7 +45,7 @@ services:
     networks:
       - esnet
   evt-es-bridge:
-    build: java-event-elastic-bridge
+    build: dotnet-event-elastic-bridge
     container_name: evt-es-bridge
     environment:
       - STREAM_NAME=analytics
