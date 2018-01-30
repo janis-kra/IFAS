@@ -10,9 +10,6 @@ services:
   eventstore:
     image: eventstore/eventstore
     container_name: eventstore
-    ports:
-      - 2113:2113
-      - 1113:1113
     networks:
       - esnet
   elasticsearch:
@@ -28,8 +25,6 @@ services:
     volumes:
       - elasticdata:/usr/share/elasticsearch/data
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-    ports:
-      - 9200:9200
     networks:
       - esnet
   kibana:
