@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.SystemData;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace dotnet_event_elastic_bridge
 {
@@ -30,15 +31,15 @@ namespace dotnet_event_elastic_bridge
     static void Main(string[] args)
     {
 
-      string stream = Environment.GetEnvironmentVariable("INDEX") ?? "analytics";
+      string stream = Environment.GetEnvironmentVariable("STREAM_NAME") ?? "analytics";
       var elasticsearchName = Environment.GetEnvironmentVariable("ELASTIC_NAME") ?? "localhost";
       var eventstoreName = Environment.GetEnvironmentVariable("EVENTSTORE_NAME") ?? "localhost";
       var client = new HttpClient();
-      var uri = "http://" + elasticsearchName + ":9200/" + stream + "/data/?pretty";
+      var elasticAddress = "http://" + elasticsearchName + ":9200/" + stream + "/data/?pretty";
       //uncommet to enable verbose logging in client.
       var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
-      var address = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
-      using (var conn = EventStoreConnection.Create(settings, address))
+      var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
+      using (var conn = EventStoreConnection.Create(settings, evtStAddress))
       {
         conn.ConnectAsync().Wait();
 
@@ -50,18 +51,20 @@ namespace dotnet_event_elastic_bridge
           {
             var sub = conn.ConnectToPersistentSubscription(stream, GROUP, (_, x) =>
             {
-              var data = Encoding.ASCII.GetString(x.Event.Data);
               Console.WriteLine("Received: " + x.Event.EventStreamId + ":" + x.Event.EventNumber);
-              Console.WriteLine(data);
-              client.PostAsync(uri, new StringContent(data, Encoding.UTF8, "application/json"));
+              var eventData = JObject.Parse(Encoding.ASCII.GetString(x.Event.Data));
+              var data = new Dictionary<string, object>();
+              data.Add("Data", eventData);
+              data.Add("EventType", x.Event.EventType.ToString());
+              data.Add("@timestamp", eventData["@timestamp"]);
+              var json = JsonConvert.SerializeObject(data);
+              Console.WriteLine(json);
+              client.PostAsync(elasticAddress, new StringContent(json, Encoding.UTF8, "application/json"));
             });
 
-            // does not work when Console.ReadLine() and tsc.SetResult is commented out
-            Console.WriteLine("waiting for events.");
-            // Console.ReadLine();
-            // tsc.SetResult("ok");
+            Console.WriteLine($"waiting for events on {evtStAddress} to post to {elasticAddress}.");
           }
-          catch (System.Exception e)
+          catch (Exception e)
           {
             tsc.SetResult(e.Message);
           }
