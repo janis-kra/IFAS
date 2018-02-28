@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   eventstore:
-    image: eventstore/eventstore
+    image: eventstore/eventstore:release-4.1.0
     container_name: eventstore
     networks:
       - feedback-net
