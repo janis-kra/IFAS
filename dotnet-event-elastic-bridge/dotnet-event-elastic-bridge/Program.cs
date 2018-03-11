@@ -9,8 +9,10 @@ using EventStore.ClientAPI;
 using EventStore.ClientAPI.SystemData;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Nest;
+using System.Threading;
 
-namespace dotnet_event_elastic_bridge
+namespace dotneteventelasticbridge
 {
   /*
   * This example sets up a volatile subscription to a test stream.
@@ -25,23 +27,31 @@ namespace dotnet_event_elastic_bridge
   */
   class Program
   {
-    const string GROUP = "analytics";
+
     const int DEFAULTPORT = 1113;
+    const int BATCH_SIZE = 100;
+    const int DELAY = 3000;
 
     static void Main(string[] args)
     {
-
-      string stream = Environment.GetEnvironmentVariable("STREAM_NAME") ?? "analytics";
+      string stream = Environment.GetEnvironmentVariable("STREAM") ?? "mattermost";
+      string group = Environment.GetEnvironmentVariable("GROUP") ?? "analytics";
       var elasticsearchName = Environment.GetEnvironmentVariable("ELASTIC_NAME") ?? "localhost";
       var eventstoreName = Environment.GetEnvironmentVariable("EVENTSTORE_NAME") ?? "localhost";
-      var client = new HttpClient();
+
       var elasticAddress = "http://" + elasticsearchName + ":9200/" + stream + "/data/?pretty";
+      var nestNode = new Uri(elasticAddress);
+      var nestSettings = new Nest.ConnectionSettings(nestNode);
+      nestSettings.DefaultIndex(stream + "-test");
+      var nestClient = new ElasticClient(nestSettings);
+
       //uncommet to enable verbose logging in client.
-      var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
+      var settings = EventStore.ClientAPI.ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
       using (var conn = EventStoreConnection.Create(settings, evtStAddress))
       {
         conn.ConnectAsync().Wait();
+        var events = new List<Event>();
 
         TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
         Task<string> t = tsc.Task;
@@ -49,17 +59,35 @@ namespace dotnet_event_elastic_bridge
         {
           try
           {
-            var sub = conn.ConnectToPersistentSubscription(stream, GROUP, (_, x) =>
+            var sub = conn.ConnectToPersistentSubscription(stream, group, (_, x) =>
             {
-              Console.WriteLine("Received: " + x.Event.EventStreamId + ":" + x.Event.EventNumber);
-              var eventData = JObject.Parse(Encoding.ASCII.GetString(x.Event.Data));
-              var data = new Dictionary<string, object>();
-              data.Add("Data", eventData);
-              data.Add("EventType", x.Event.EventType.ToString());
-              data.Add("@timestamp", eventData["@timestamp"]);
-              var json = JsonConvert.SerializeObject(data);
-              Console.WriteLine(json);
-              client.PostAsync(elasticAddress, new StringContent(json, Encoding.UTF8, "application/json"));
+                Console.WriteLine("Received: " + x.Event.EventStreamId + ":" + x.Event.EventNumber);
+                var eventData = JObject.Parse(Encoding.ASCII.GetString(x.Event.Data));
+                var ms = long.Parse(eventData["@timestamp"].ToString());
+                var evt = new Event
+                {
+                    Data = Encoding.ASCII.GetString(x.Event.Data),
+                    EventType = x.Event.EventType,
+                    Timestamp = DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime
+                };
+                //var data = new Dictionary<string, object>();
+                //data.Add("Data", eventData);
+                //data.Add("EventType", x.Event.EventType.ToString());
+                //data.Add("@timestamp", eventData["@timestamp"]);
+                //var json = JsonConvert.SerializeObject(data);
+                events.Add(evt);
+
+                //if (timer == null)
+                //{
+                //    timer = new Timer((_x) =>
+                //    {
+                var response = nestClient.IndexMany(events);
+                events.Clear();
+                //        timer.Dispose();
+                //        timer = null;
+                //    },
+                //    null, DELAY, 0);
+                //}
             });
 
             Console.WriteLine($"waiting for events on {evtStAddress} to post to {elasticAddress}.");

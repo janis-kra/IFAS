@@ -3,12 +3,17 @@ services:
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore
+    ports:
+      - 127.0.0.1:1113:1113
+      - 127.0.0.1:2113:2113
     networks:
       - feedback-net
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
     container_name: elasticsearch
     command: elasticsearch
+    ports:
+      - 127.0.0.1:9200:9200
     ulimits:
       memlock:
         soft: -1
@@ -36,7 +41,6 @@ services:
     build: dotnet-event-elastic-bridge
     container_name: evt-es-bridge
     environment:
-      - STREAM_NAME=mattermost
       - STREAM_URL=eventstore
       - ELASTIC_NAME=elasticsearch
       - EVENTSTORE_NAME=eventstore
@@ -45,12 +49,19 @@ services:
     networks:
       - feedback-net
   nginx:
-    image: nginx
+    image: nginx:1.13
     container_name: nginx
     ports:
       - 6601:6601
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - feedback-net
+  event-generator:
+    build: event-generator
+    container_name: event-generator
+    environment:
+      - EVENTSTORE_NAME=eventstore
     networks:
       - feedback-net
 volumes:

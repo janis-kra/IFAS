@@ -7,5 +7,10 @@
 
   <ItemGroup>
     <PackageReference Include="EventStore.ClientAPI.NetCore" Version="4.0.3-rc" />
+    <PackageReference Include="NEST" Version="6.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Screen.cs" />
+    <Compile Remove="EmptyClass.cs" />
   </ItemGroup>
 </Project>
