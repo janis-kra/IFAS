@@ -32,6 +32,7 @@ namespace event_generator
             {
                 Console.WriteLine("Connected to Event Store");
                 conn.ConnectAsync().Wait();
+                CreateSubscription(conn, stream, "performance");
 
                 EventStoreTransaction transaction = conn.StartTransactionAsync(stream, ExpectedVersion.Any).Result;
                 var eventData = new EventData[TRANSACTION_SIZE];
@@ -69,5 +70,36 @@ namespace event_generator
                 Console.WriteLine($"Took {end - start}");
             }
         }
+
+    private static void CreateSubscription(IEventStoreConnection conn, string stream, string group)
+        {
+            var credentials = new UserCredentials("admin", "changeit");
+            PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
+                .DoNotResolveLinkTos()
+                .StartFromCurrent(); // strat from current, such that existing events do not mess with the result of the performance test
+
+            try
+            {
+                conn.DeletePersistentSubscriptionAsync(stream, group, credentials);
+            }
+            catch (Exception)
+            {
+                // just assume the subscriptions did not exist yet, move on
+            }
+
+            try
+            {
+                conn.CreatePersistentSubscriptionAsync(stream, group, settings, credentials).Wait();
+                Console.WriteLine($"Created persistent subscription {stream} of group {group}");
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerException.GetType() != typeof(InvalidOperationException)
+                    && ex.InnerException?.Message != $"Subscription group {group} on stream {stream} already exists")
+                {
+                    throw;
+                }
+            }
+      }
     }
 }
