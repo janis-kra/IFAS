@@ -1,10 +1,12 @@
 using System;
+using System.Dynamic;
+
 namespace dotneteventelasticbridge
 {
-    public class Event
+  public class Event
     {
         public string EventType { get; set; }
-        public string Data { get; set; }
+        public ExpandoObject Data { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

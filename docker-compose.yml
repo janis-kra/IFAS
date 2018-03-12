@@ -1,5 +1,6 @@
 version: "3.4"
 services:
+
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore
@@ -8,6 +9,7 @@ services:
       - 127.0.0.1:2113:2113
     networks:
       - feedback-net
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
     container_name: elasticsearch
@@ -25,6 +27,7 @@ services:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
       - feedback-net
+
   kibana:
     image: docker.elastic.co/kibana/kibana:6.1.1
     container_name: kibana
@@ -37,6 +40,7 @@ services:
       - cluster.name=docker-cluster
     networks:
       - feedback-net
+
   evt-es-bridge:
     build: dotnet-event-elastic-bridge
     container_name: evt-es-bridge
@@ -48,6 +52,7 @@ services:
       - PW=changeit
     networks:
       - feedback-net
+
   nginx:
     image: nginx:1.13
     container_name: nginx
@@ -57,6 +62,7 @@ services:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
     networks:
       - feedback-net
+
   event-generator:
     build: event-generator
     container_name: event-generator
@@ -64,6 +70,65 @@ services:
       - EVENTSTORE_NAME=eventstore
     networks:
       - feedback-net
+
+
+  # mattermost:
+
+  db:
+    build: ./mattermost-docker/db
+    restart: unless-stopped
+    volumes:
+      - ./mattermost-docker/volumes/db/var/lib/postgresql/data:/var/lib/postgresql/data
+      # - /etc/localtime:/etc/localtime:ro
+    environment:
+      - POSTGRES_USER=mmuser
+      - POSTGRES_PASSWORD=mmuser_password
+      - POSTGRES_DB=mattermost
+    # uncomment the following to enable backup
+    #  - AWS_ACCESS_KEY_ID=XXXX
+    #  - AWS_SECRET_ACCESS_KEY=XXXX
+    #  - WALE_S3_PREFIX=s3://BUCKET_NAME/PATH
+    #  - AWS_REGION=us-east-1
+    networks:
+      - mattermost-net
+
+  app:
+    build:
+      context: ./mattermost-docker/app
+      args:
+        - edition=team
+    restart: unless-stopped
+    volumes:
+      - ./mattermost-docker/volumes/app/mattermost/config:/mattermost/config:rw
+      - ./mattermost-docker/volumes/app/mattermost/data:/mattermost/data:rw
+      - ./mattermost-docker/volumes/app/mattermost/logs:/mattermost/logs:rw
+      # - /etc/localtime:/etc/localtime:ro
+    environment:
+      # set same as db credentials and dbname
+      - MM_USERNAME=mmuser
+      - MM_PASSWORD=mmuser_password
+      - MM_DBNAME=mattermost
+      # in case your config is not in default location
+      #- MM_CONFIG=/mattermost/config/config.json
+    networks:
+      - mattermost-net
+
+  web:
+    build: ./mattermost-docker/web
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      # This directory must have cert files if you want to enable SSL
+      - ./volumes/web/cert:/cert:ro
+      # - /etc/localtime:/etc/localtime:ro
+    # Uncomment for SSL
+    # environment:
+    #  - MATTERMOST_ENABLE_SSL=true
+    networks:
+      - mattermost-net
+
 volumes:
   elasticdata:
     driver: local
@@ -72,3 +137,4 @@ volumes:
 
 networks:
   feedback-net:
+  mattermost-net:
