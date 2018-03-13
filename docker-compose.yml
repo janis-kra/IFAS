@@ -4,6 +4,12 @@ services:
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore
+    networks:
+      - feedback-net
+
+  eventstore-1:
+    image: eventstore/eventstore:release-4.1.0
+    container_name: eventstore-1
     environment:
       - EVENTSTORE_CLUSTER_SIZE=3
       - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
