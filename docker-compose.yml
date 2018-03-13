@@ -4,9 +4,6 @@ services:
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore
-    ports:
-      - 127.0.0.1:1113:1113
-      - 127.0.0.1:2113:2113
     environment:
       - EVENTSTORE_CLUSTER_SIZE=3
       - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
@@ -18,9 +15,6 @@ services:
   eventstore-2:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore-2
-    ports:
-      - 127.0.0.1:1114:1113
-      - 127.0.0.1:2114:2113
     environment:
       - EVENTSTORE_CLUSTER_SIZE=3
       - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
@@ -32,9 +26,6 @@ services:
   eventstore-3:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore-3
-    ports:
-      - 127.0.0.1:1115:1113
-      - 127.0.0.1:2115:2113
     environment:
       - EVENTSTORE_CLUSTER_SIZE=3
       - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
@@ -47,8 +38,6 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
     container_name: elasticsearch
     command: elasticsearch
-    ports:
-      - 127.0.0.1:9200:9200
     ulimits:
       memlock:
         soft: -1
@@ -86,15 +75,15 @@ services:
     networks:
       - feedback-net
 
-  nginx:
-    image: nginx:1.13
-    container_name: nginx
-    ports:
-      - 6601:6601
-    volumes:
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
-    networks:
-      - feedback-net
+  # nginx:
+  #   image: nginx:1.13
+  #   container_name: nginx
+  #   ports:
+  #     - 6601:6601
+  #   volumes:
+  #     - ./nginx/conf.d/:/etc/nginx/conf.d/
+  #   networks:
+  #     - feedback-net
 
   event-generator:
     build: event-generator
