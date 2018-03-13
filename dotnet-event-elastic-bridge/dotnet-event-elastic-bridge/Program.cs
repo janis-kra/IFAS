@@ -69,7 +69,7 @@ namespace dotneteventelasticbridge
       using (var conn = EventStoreConnection.Create(settings, evtStAddress))
       {
         conn.ConnectAsync().Wait();
-        var events = new List<UserClickedEvent>();
+        var events = new List<Event>();
 
         TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
         Task<string> t = tsc.Task;
@@ -92,7 +92,7 @@ namespace dotneteventelasticbridge
                   System.Threading.Timer timer = null;
                   timer = new System.Threading.Timer((obj) =>
                     {
-                      ReadOnlyCollection<UserClickedEvent> sendEvents = null;
+                      ReadOnlyCollection<Event> sendEvents = null;
                       semaphore.Wait();
                       try
                       {
@@ -103,7 +103,7 @@ namespace dotneteventelasticbridge
                       {
                         semaphore.Release();
                       }
-                      events = new List<UserClickedEvent>();
+                      events = new List<Event>();
                       WriteResults(semaphore, sendEvents, nestClient, tsc, delay, start);
                       timer.Dispose();
                     },
@@ -132,7 +132,7 @@ namespace dotneteventelasticbridge
 
     private static async void WriteResults(
       SemaphoreSlim semaphore,
-      ReadOnlyCollection<UserClickedEvent> events,
+      ReadOnlyCollection<Event> events,
       ElasticClient nestClient,
       TaskCompletionSource<string> tsc,
       int delay,
@@ -155,7 +155,7 @@ namespace dotneteventelasticbridge
       {
         semaphore.Release();
       }
-      var response = nestClient.IndexMany(events);
+      var response = nestClient.IndexMany(events, type: "_doc"); // type is always doc
       if (response.IsValid)
       {
       }

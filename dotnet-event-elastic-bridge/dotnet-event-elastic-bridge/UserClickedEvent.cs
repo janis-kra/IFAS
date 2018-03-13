@@ -1,19 +1,15 @@
 ﻿using System;
 namespace dotneteventelasticbridge
 {
-  public class UserClickedEvent
+  public class UserClickedEvent: Event
   {
-    public string EventType { get; set; }
-    public UserClickedEventData Data { get; set; }
-    public DateTime Timestamp { get; set; }
+    public new UserClickedEventData Data { get; set; }
 
-    public class UserClickedEventData
+    public class UserClickedEventData: EventData
     {
       public Click click { get; set; }
       public Screen screen { get; set; }
       public string owner { get; set; }
-      public string timestamp { get; set; }
-      public User user { get; set; }
     }
 
     public class User
