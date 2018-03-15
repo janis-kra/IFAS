@@ -9,12 +9,6 @@ namespace dotneteventelasticbridge
     {
       public Msg msg { get; set; }
       public Post post { get; set; }
-      public User user { get; set; }
-    }
-
-    public class User
-    {
-      public string id { get; set; }
     }
 
     public class Msg

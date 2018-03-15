@@ -9,7 +9,6 @@ namespace dotneteventelasticbridge
     {
       public string message { get; set; }
       public string sentVia { get; set; }
-      public new WithId user { get; set; }
     }
   }
 }

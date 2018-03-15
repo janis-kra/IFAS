@@ -6,6 +6,6 @@ namespace dotneteventelasticbridge
   public class EventData
     {
         public string timestamp { get; set; }
-        public string user { get; set; }
+        public WithId user { get; set; }
     }
 }

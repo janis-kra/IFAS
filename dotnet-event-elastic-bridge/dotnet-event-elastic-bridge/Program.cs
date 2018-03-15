@@ -51,7 +51,11 @@ namespace dotneteventelasticbridge
       var elasticsearchIndex = Environment.GetEnvironmentVariable("ES_INDEX") ?? stream;
       var delay = Int32.Parse(Environment.GetEnvironmentVariable("DELAY") ?? "1000");
       var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "10");
-      expectedAmount = Int32.Parse(Environment.GetEnvironmentVariable("EXPECTED_AMOUNT") ?? "150");
+      expectedAmount = Int32.Parse(Environment.GetEnvironmentVariable("EXPECTED_AMOUNT") ?? "0");
+      if (expectedAmount == 0)
+      {
+        expectedAmount = Int32.MaxValue;
+      }
 
       var elasticAddress = "http://" + elasticsearchName + ":9200/";
       var nestNode = new Uri(elasticAddress);
@@ -187,78 +191,90 @@ namespace dotneteventelasticbridge
 
     private static Event CreateEvent(ResolvedEvent evt)
     {
+      Event myEvent;
       var json = Encoding.ASCII.GetString(evt.Event.Data);
-      var data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json);
-      DateTimeOffset ts;
-      if (data.timestamp == null)
+      // parse once as the Event type to get access to the timestamp
+      var genericEvent = JsonConvert.DeserializeObject<EventData>(json);
+      var ts = genericEvent.timestamp;
+
+      DateTimeOffset timeOffset;
+      if (ts == null)
       {
-        ts = new DateTimeOffset();
+        timeOffset = new DateTimeOffset();
       }
       else
       {
         try
         {
-          ts = DateTimeOffset.Parse(data.timestamp);
+          timeOffset = DateTimeOffset.Parse(ts);
         }
         catch (Exception)
         {
-          var ms = long.Parse(data.timestamp);
-          ts = DateTimeOffset.FromUnixTimeMilliseconds(ms);
+          var ms = long.Parse(ts);
+          timeOffset = DateTimeOffset.FromUnixTimeMilliseconds(ms);
         }
       }
 
       switch (evt.Event.EventType)
       {
-        case "UserClickedEvent":
-          return new UserClickedEvent
+        case "UserClicked":
+          myEvent = new UserClickedEvent
           {
             Data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
         case "TutorialExperimentParticipated":
-          return new ExperimentParticipatedEvent
+          myEvent =  new ExperimentParticipatedEvent
           {
             Data = JsonConvert.DeserializeObject<ExperimentParticipatedEvent.TutorialEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
         case "PostCreated":
-          return new PostCreatedEvent
+          myEvent =  new PostCreatedEvent
           {
             Data = JsonConvert.DeserializeObject<PostCreatedEvent.PostCreatedEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
         case "MessageSent":
-          return new MessageSentEvent
+          myEvent =  new MessageSentEvent
           {
             Data = JsonConvert.DeserializeObject<MessageSentEvent.MessageSentEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
         case "ChannelSwitched":
-          return new ChannelSwitchedEvent
+          myEvent =  new ChannelSwitchedEvent
           {
             Data = JsonConvert.DeserializeObject<ChannelSwitchedEvent.ChannelSwitchedEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
         case "WindowScrolled":
-          return new WindowScrolledEvent
+          myEvent =  new WindowScrolledEvent
           {
             Data = JsonConvert.DeserializeObject<WindowScrolledEvent.WindowScrolledEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
         default:
-          return new Event
+          myEvent =  new Event
           {
             Data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json),
             EventType = evt.Event.EventType,
-            Timestamp = ts.UtcDateTime
+            Timestamp = timeOffset.UtcDateTime
           };
+          break;
       }
+      return myEvent;
     }
 
     private static double ToTimestamp (DateTime time) {

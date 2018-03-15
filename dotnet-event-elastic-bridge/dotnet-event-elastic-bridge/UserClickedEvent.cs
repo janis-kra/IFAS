@@ -12,11 +12,6 @@ namespace dotneteventelasticbridge
       public string owner { get; set; }
     }
 
-    public class User
-    {
-      public string id { get; set; }
-    }
-    
     public class Click
     {
       public double x { get; set; }

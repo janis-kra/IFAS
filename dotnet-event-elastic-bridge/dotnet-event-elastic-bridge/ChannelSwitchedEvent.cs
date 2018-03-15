@@ -8,7 +8,6 @@ namespace dotneteventelasticbridge
     public class ChannelSwitchedEventData: EventData
     {
       public string via { get; set; }
-      public new WithId user { get; set; }
       public WithId channel { get; set; }
     }
   }
