@@ -3,6 +3,11 @@
 #docker-compose up --no-start --build event-generator
 #docker-compose up --no-start --build evt-es-bridge
 
+if [ -z ${1+x} ]; then EXP_SIZE=$1; else EXP_SIZE=100; fi
+if [ -z ${2+x} ]; then CLIENT_BUFF_SIZE=$2; else CLIENT_BUFF_SIZE=100; fi
+if [ -z ${3+x} ]; then BUFF_SIZE=$2; else BUFF_SIZE=500; fi
+if [ -z ${4+x} ]; then LIVE_BUFF_SIZE=$3; else LIVE_BUFF_SIZE=500; fi
+if [ -z ${5+x} ]; then READ_BATCH=$5; else READ_BATCH=20; fi
 
 docker-compose run -e EXPERIMENT_SIZE=$1 \
     -e BUFFER_SIZE=$3 \
