@@ -69,7 +69,7 @@ namespace dotneteventelasticbridge
       using (var conn = EventStoreConnection.Create(settings, evtStAddress))
       {
         conn.ConnectAsync().Wait();
-        var events = new List<Event>();
+        var eventsCollection = new Dictionary<string, List<Event>>();
 
         TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
         Task<string> t = tsc.Task;
@@ -84,7 +84,7 @@ namespace dotneteventelasticbridge
               semaphore.Wait();
               try
               {
-                events.Add(evt);
+                AddEventTo(eventsCollection, evt);
                 // Console.WriteLine($"Enqueued event {x.OriginalEventNumber}");
                 if (!timerStarted)
                 {
@@ -92,19 +92,19 @@ namespace dotneteventelasticbridge
                   System.Threading.Timer timer = null;
                   timer = new System.Threading.Timer((obj) =>
                     {
-                      ReadOnlyCollection<Event> sendEvents = null;
+                      Dictionary<string, List<Event>> sendEvents = null;
                       semaphore.Wait();
                       try
                       {
                         timerStarted = false;
-                        sendEvents = events.AsReadOnly();
+                        sendEvents = eventsCollection;
                       }
                       finally
                       {
                         semaphore.Release();
                       }
-                      events = new List<Event>();
-                      WriteResults(semaphore, sendEvents, nestClient, tsc, delay, start);
+                      eventsCollection = new Dictionary<string, List<Event>>();
+                      WriteResults(semaphore, sendEvents, nestClient, tsc, delay, start, stream);
                       timer.Dispose();
                     },
                     null, delay, System.Threading.Timeout.Infinite);
@@ -130,23 +130,34 @@ namespace dotneteventelasticbridge
       }
     }
 
+    private static void AddEventTo(Dictionary<string, List<Event>> eventsCollection, Event evt)
+    {
+      List<Event> events;
+      if (!eventsCollection.TryGetValue(evt.EventType, out events))
+      {
+        events = new List<Event>();
+        eventsCollection.Add(evt.EventType, events);
+      }
+      events.Add(evt);
+    }
+
     private static async void WriteResults(
       SemaphoreSlim semaphore,
-      ReadOnlyCollection<Event> events,
+      Dictionary<string, List<Event>> eventsCollection,
       ElasticClient nestClient,
       TaskCompletionSource<string> tsc,
       int delay,
-      double start
+      double start,
+      string index
       )
     {
       await Task.Delay(delay);
-      int amount;
 
       await semaphore.WaitAsync();
+      var amount = eventsCollection.Sum((events) => events.Value.Count);
       // Console.WriteLine($"Sending {events.Count} events");
       try
       {
-        amount = events.Count;
         totalAmount += amount;
         var now = ToTimestamp(DateTime.UtcNow);
         Console.WriteLine($"{amount}; {totalAmount}; {now};");
@@ -155,14 +166,17 @@ namespace dotneteventelasticbridge
       {
         semaphore.Release();
       }
-      var response = nestClient.IndexMany(events, type: "_doc"); // type is always doc
-      if (response.IsValid)
+
+      foreach (KeyValuePair<string, List<Event>> entry in eventsCollection)
       {
-      }
-      else
-      {
-        Console.WriteLine($";;;Error while sending {amount} events to elasticsearch");
-        throw new Exception(response.ServerError.ToString());
+        var events = entry.Value;
+        var eventType = entry.Key;
+        var response = nestClient.IndexMany(events, $"{index}_{eventType.ToLower()}"); // type is always doc
+        if (!response.IsValid)
+        {
+          Console.WriteLine($";;;Error while sending {amount} events to elasticsearch");
+          throw new Exception(response.DebugInformation.ToString());
+        }
       }
 
       if (totalAmount >= expectedAmount)
@@ -171,7 +185,7 @@ namespace dotneteventelasticbridge
       }
     }
 
-    private static UserClickedEvent CreateEvent(ResolvedEvent evt)
+    private static Event CreateEvent(ResolvedEvent evt)
     {
       var json = Encoding.ASCII.GetString(evt.Event.Data);
       var data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json);
@@ -192,12 +206,59 @@ namespace dotneteventelasticbridge
           ts = DateTimeOffset.FromUnixTimeMilliseconds(ms);
         }
       }
-      return new UserClickedEvent
+
+      switch (evt.Event.EventType)
       {
-        Data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json),
-        EventType = evt.Event.EventType,
-        Timestamp = ts.UtcDateTime
-      };
+        case "UserClickedEvent":
+          return new UserClickedEvent
+          {
+            Data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+        case "TutorialExperimentParticipated":
+          return new ExperimentParticipatedEvent
+          {
+            Data = JsonConvert.DeserializeObject<ExperimentParticipatedEvent.TutorialEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+        case "PostCreated":
+          return new PostCreatedEvent
+          {
+            Data = JsonConvert.DeserializeObject<PostCreatedEvent.PostCreatedEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+        case "MessageSent":
+          return new MessageSentEvent
+          {
+            Data = JsonConvert.DeserializeObject<MessageSentEvent.MessageSentEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+        case "ChannelSwitched":
+          return new ChannelSwitchedEvent
+          {
+            Data = JsonConvert.DeserializeObject<ChannelSwitchedEvent.ChannelSwitchedEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+        case "WindowScrolled":
+          return new WindowScrolledEvent
+          {
+            Data = JsonConvert.DeserializeObject<WindowScrolledEvent.WindowScrolledEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+        default:
+          return new Event
+          {
+            Data = JsonConvert.DeserializeObject<UserClickedEvent.UserClickedEventData>(json),
+            EventType = evt.Event.EventType,
+            Timestamp = ts.UtcDateTime
+          };
+      }
     }
 
     private static double ToTimestamp (DateTime time) {
