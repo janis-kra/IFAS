@@ -4,6 +4,8 @@ services:
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     container_name: eventstore
+    ports:
+      - 2113:2113
     networks:
       - feedback-net
 
@@ -77,7 +79,7 @@ services:
       - ELASTIC_NAME=elasticsearch
       - EVENTSTORE_NAME=eventstore
       - USER=admin
-      - PW=changeit
+      - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
       - BUFFER_SIZE=100
     networks:
       - feedback-net
@@ -97,6 +99,8 @@ services:
     container_name: event-generator
     environment:
       - EVENTSTORE_NAME=eventstore
+      - USER=admin
+      - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
     networks:
       - feedback-net
 
