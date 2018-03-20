@@ -76,6 +76,9 @@ namespace dotneteventelasticbridge
       using (var conn = EventStoreConnection.Create(settings, evtStAddress))
       {
         conn.ConnectAsync().Wait();
+
+        CreateSubscription(conn, stream, group, 500, 500, 40); // create subscription if it does not exist
+
         var eventsCollection = new Dictionary<string, List<Event>>();
 
         TaskCompletionSource<string> tsc = new TaskCompletionSource<string>();
@@ -282,6 +285,37 @@ namespace dotneteventelasticbridge
 
     private static double ToTimestamp (DateTime time) {
       return (time.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+    }
+
+    private static void CreateSubscription(
+        IEventStoreConnection conn,
+        string stream,
+        string group,
+        int buffer,
+        int liveBuffer,
+        int read
+    )
+    {
+      var credentials = new UserCredentials("admin", "changeit");
+      PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
+          .DoNotResolveLinkTos()
+          .WithBufferSizeOf(buffer)
+          .WithLiveBufferSizeOf(liveBuffer)
+          .WithReadBatchOf(read);
+
+      try
+      {
+        conn.CreatePersistentSubscriptionAsync(stream, group, settings, credentials).Wait();
+        Console.WriteLine($"Created persistent subscription {stream} of group {group}");
+      }
+      catch (AggregateException ex)
+      {
+        if (ex.InnerException.GetType() != typeof(InvalidOperationException)
+            && ex.InnerException?.Message != $"Subscription group {group} on stream {stream} already exists")
+        {
+          throw;
+        }
+      }
     }
   }
 }
