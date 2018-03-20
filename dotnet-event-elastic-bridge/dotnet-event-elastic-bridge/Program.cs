@@ -64,9 +64,10 @@ namespace dotneteventelasticbridge
       nestSettings.DefaultIndex(elasticsearchIndex);
       var nestClient = new ElasticClient(nestSettings);
       var nestLowLevelClient = new ElasticLowLevelClient(nestSettings);
-
+      
+      var credentials = new UserCredentials("admin", password);
       //uncommet to enable verbose logging in client.
-      var settings = EventStore.ClientAPI.ConnectionSettings.Create().SetDefaultUserCredentials(new UserCredentials("admin", password));//.EnableVerboseLogging().UseConsoleLogger();
+      var settings = EventStore.ClientAPI.ConnectionSettings.Create().SetDefaultUserCredentials(credentials);//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
 
       // wait 30 seconds before connecting s.t. eventstore and elastic have time to spin up
@@ -122,7 +123,7 @@ namespace dotneteventelasticbridge
               {
                 semaphore.Release();
               }
-            }, bufferSize: bufferSize);
+            }, null, credentials, bufferSize);
 
             Console.WriteLine($";;;waiting for events on {evtStAddress} to post to {elasticAddress}.");
           }
