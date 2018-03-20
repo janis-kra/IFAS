@@ -51,6 +51,7 @@ namespace dotneteventelasticbridge
       var elasticsearchIndex = Environment.GetEnvironmentVariable("ES_INDEX") ?? stream;
       var delay = Int32.Parse(Environment.GetEnvironmentVariable("DELAY") ?? "1000");
       var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "10");
+      var password = Environment.GetEnvironmentVariable("PW") ?? "changeit";
       expectedAmount = Int32.Parse(Environment.GetEnvironmentVariable("EXPECTED_AMOUNT") ?? "0");
       if (expectedAmount == 0)
       {
@@ -65,7 +66,7 @@ namespace dotneteventelasticbridge
       var nestLowLevelClient = new ElasticLowLevelClient(nestSettings);
 
       //uncommet to enable verbose logging in client.
-      var settings = EventStore.ClientAPI.ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
+      var settings = EventStore.ClientAPI.ConnectionSettings.Create().SetDefaultUserCredentials(new UserCredentials("admin", password));//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
 
       // wait 30 seconds before connecting s.t. eventstore and elastic have time to spin up
@@ -111,7 +112,7 @@ namespace dotneteventelasticbridge
                         semaphore.Release();
                       }
                       eventsCollection = new Dictionary<string, List<Event>>();
-                      WriteResults(semaphore, sendEvents, nestClient, tsc, delay, start, stream);
+                      WriteResults(semaphore, sendEvents, nestClient, tsc, stream);
                       timer.Dispose();
                     },
                     null, delay, System.Threading.Timeout.Infinite);
@@ -153,13 +154,9 @@ namespace dotneteventelasticbridge
       Dictionary<string, List<Event>> eventsCollection,
       ElasticClient nestClient,
       TaskCompletionSource<string> tsc,
-      int delay,
-      double start,
       string index
       )
     {
-      await Task.Delay(delay);
-
       await semaphore.WaitAsync();
       var amount = eventsCollection.Sum((events) => events.Value.Count);
       // Console.WriteLine($"Sending {events.Count} events");

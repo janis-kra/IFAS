@@ -16,6 +16,7 @@ namespace event_generator
   {
     const int DEFAULTPORT = 1113;
     const int TRANSACTION_SIZE = 50;
+    string PW = "changeit";
 
     static void Main(string[] args)
     {
@@ -25,6 +26,7 @@ namespace event_generator
       var liveBufferSize = Int32.Parse(Environment.GetEnvironmentVariable("LIFE_BUFFER_SIZE") ?? "500");
       var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "500");
       var readBatch = Int32.Parse(Environment.GetEnvironmentVariable("READ_BATCH") ?? "40");
+      pw = 
       //uncommet to enable verbose logging in client.
       var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
@@ -88,7 +90,7 @@ namespace event_generator
         int read
     )
     {
-      var credentials = new UserCredentials("admin", "changeit");
+      var credentials = new UserCredentials("admin", PW);
       PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
           .DoNotResolveLinkTos()
           .WithBufferSizeOf(buffer)
