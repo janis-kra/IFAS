@@ -7,38 +7,38 @@ services:
     networks:
       - feedback-net
 
-  eventstore-1:
-    image: eventstore/eventstore:release-4.1.0
-    container_name: eventstore-1
-    environment:
-      - EVENTSTORE_CLUSTER_SIZE=3
-      - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
-    networks:
-      feedback-net:
-        aliases:
-          - eventstore-cluster
+  # eventstore-1:
+  #   image: eventstore/eventstore:release-4.1.0
+  #   container_name: eventstore-1
+  #   environment:
+  #     - EVENTSTORE_CLUSTER_SIZE=3
+  #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
+  #   networks:
+  #     feedback-net:
+  #       aliases:
+  #         - eventstore-cluster
 
-  eventstore-2:
-    image: eventstore/eventstore:release-4.1.0
-    container_name: eventstore-2
-    environment:
-      - EVENTSTORE_CLUSTER_SIZE=3
-      - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
-    networks:
-      feedback-net:
-        aliases:
-          - eventstore-cluster
+  # eventstore-2:
+  #   image: eventstore/eventstore:release-4.1.0
+  #   container_name: eventstore-2
+  #   environment:
+  #     - EVENTSTORE_CLUSTER_SIZE=3
+  #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
+  #   networks:
+  #     feedback-net:
+  #       aliases:
+  #         - eventstore-cluster
 
-  eventstore-3:
-    image: eventstore/eventstore:release-4.1.0
-    container_name: eventstore-3
-    environment:
-      - EVENTSTORE_CLUSTER_SIZE=3
-      - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
-    networks:
-      feedback-net:
-        aliases:
-          - eventstore-cluster
+  # eventstore-3:
+  #   image: eventstore/eventstore:release-4.1.0
+  #   container_name: eventstore-3
+  #   environment:
+  #     - EVENTSTORE_CLUSTER_SIZE=3
+  #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
+  #   networks:
+  #     feedback-net:
+  #       aliases:
+  #         - eventstore-cluster
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
@@ -78,6 +78,7 @@ services:
       - EVENTSTORE_NAME=eventstore
       - USER=admin
       - PW=changeit
+      - BUFFER_SIZE=100
     networks:
       - feedback-net
 
@@ -145,7 +146,6 @@ services:
     build: ./mattermost-docker/web
     ports:
       - "80:80"
-      - "443:443"
     restart: unless-stopped
     volumes:
       # This directory must have cert files if you want to enable SSL

@@ -27,9 +27,6 @@ namespace dotneteventelasticbridge
 
     public class Target
     {
-      public string id { get; set; }
-      [Newtonsoft.Json.JsonProperty("class")]
-      public string Class { get; set; }
       public string name { get; set; }
       public string text { get; set; }
     }
