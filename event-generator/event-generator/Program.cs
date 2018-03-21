@@ -16,7 +16,6 @@ namespace event_generator
   {
     const int DEFAULTPORT = 1113;
     const int TRANSACTION_SIZE = 50;
-    string PW = "changeit";
 
     static void Main(string[] args)
     {
@@ -26,7 +25,7 @@ namespace event_generator
       var liveBufferSize = Int32.Parse(Environment.GetEnvironmentVariable("LIFE_BUFFER_SIZE") ?? "500");
       var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "500");
       var readBatch = Int32.Parse(Environment.GetEnvironmentVariable("READ_BATCH") ?? "40");
-      pw = 
+      string pw = Environment.GetEnvironmentVariable("PW") ?? "changeit";
       //uncommet to enable verbose logging in client.
       var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
@@ -37,7 +36,7 @@ namespace event_generator
       {
         Console.WriteLine("Connected to Event Store");
         conn.ConnectAsync().Wait();
-        CreateSubscription(conn, stream, "performance", bufferSize, liveBufferSize, readBatch);
+        CreateSubscription(conn, stream, "performance", bufferSize, liveBufferSize, readBatch, pw);
 
         EventStoreTransaction transaction = conn.StartTransactionAsync(stream, ExpectedVersion.Any).Result;
         var eventData = new EventData[size < TRANSACTION_SIZE ? size : TRANSACTION_SIZE];
@@ -87,10 +86,11 @@ namespace event_generator
         string group,
         int buffer,
         int liveBuffer,
-        int read
+        int read,
+        string pw
     )
     {
-      var credentials = new UserCredentials("admin", PW);
+      var credentials = new UserCredentials("admin", pw);
       PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
           .DoNotResolveLinkTos()
           .WithBufferSizeOf(buffer)
