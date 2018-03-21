@@ -5,7 +5,7 @@ do
   echo "$size"
   for (( j=0; j<=7; j++ ))
   do
-    factor=$((2^$j))
+    factor=$((2**$j))
     client_buffer=$(($factor*40))
     buff_size=$(($factor*500))
     live_buff_size=$(($factor*500))
