@@ -11,6 +11,6 @@ do
     live_buff_size=$(($factor*500))
     read_batch=$(($factor*20))
     echo "Performance test for size=$size, client buffer=$client_buffer, buffer size=$buff_size, live buffer size=$live_buff_size, read batch=$read_batch"
-  #   source ./performance.sh $size $client_buffer $buff_size $live_buff_size $read_batch
+    source ./performance.sh $size $client_buffer $buff_size $live_buff_size $read_batch
   done
 done
