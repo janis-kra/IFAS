@@ -3,7 +3,7 @@ for i in 100 1000 10000 100000
 do
   size=$i
   echo "$size"
-  for (( j=0; j<=7; j++ ))
+  for (( j=0; j<=9; j++ ))
   do
     factor=$((2**$j))
     client_buffer=$(($factor*40))
