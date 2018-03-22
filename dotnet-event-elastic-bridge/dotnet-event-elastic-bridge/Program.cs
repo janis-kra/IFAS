@@ -86,6 +86,8 @@ namespace dotneteventelasticbridge
         {
           try
           {
+            var now = ToTimestamp(DateTime.UtcNow);
+            Console.WriteLine($"{0}; {totalAmount}; {now};");
             var sub = conn.ConnectToPersistentSubscription(stream, group, (_, x) =>
             {
               // Console.WriteLine($"Received event {x.OriginalEventNumber}");
@@ -125,7 +127,7 @@ namespace dotneteventelasticbridge
               }
             }, null, credentials, bufferSize);
 
-            Console.WriteLine($";;;waiting for events on {evtStAddress} to post to {elasticAddress}.");
+            // Console.WriteLine($";;;waiting for events on {evtStAddress} to post to {elasticAddress}.");
           }
           catch (Exception e)
           {
@@ -133,9 +135,9 @@ namespace dotneteventelasticbridge
           }
         });
 
-        Console.WriteLine(";;;Result: " + t.Result);
-        var end = ToTimestamp(DateTime.UtcNow);
-        Console.WriteLine($";;;Took {end - start}ms");
+        var result = t.Result; // just so the main thread waits here
+        // var end = ToTimestamp(DateTime.UtcNow);
+        // Console.WriteLine($";;;Took {end - start}ms");
       }
     }
 
