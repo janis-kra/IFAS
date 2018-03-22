@@ -6,7 +6,7 @@ do
   for (( i=0; i<=3; i++ ))
   do
     size=$((10**($i+2)))
-    for (( j=0; j<=10; j++ ))
+    for (( j=0; j<=9; j++ ))
     do
       factor=$((2**$j))
       number=$((10+$i*10+$j))
