@@ -87,7 +87,7 @@ namespace dotneteventelasticbridge
           try
           {
             var now = ToTimestamp(DateTime.UtcNow);
-            Console.WriteLine($"{0}; {totalAmount}; {now};");
+            Console.WriteLine($"{0}; {totalAmount}; {now}; Connecting to stream {stream} of group {group}");
             var sub = conn.ConnectToPersistentSubscription(stream, group, (_, x) =>
             {
               // Console.WriteLine($"Received event {x.OriginalEventNumber}");
@@ -136,6 +136,7 @@ namespace dotneteventelasticbridge
         });
 
         var result = t.Result; // just so the main thread waits here
+        Console.WriteLine($";;;End result: {result}");
         // var end = ToTimestamp(DateTime.UtcNow);
         // Console.WriteLine($";;;Took {end - start}ms");
       }
@@ -178,7 +179,7 @@ namespace dotneteventelasticbridge
       {
         var events = entry.Value;
         var eventType = entry.Key;
-        var response = nestClient.IndexMany(events, $"{index}_{eventType.ToLower()}"); // type is always doc
+        var response = nestClient.IndexMany(events, $"{index}_{eventType.ToLower()}");
         if (!response.IsValid)
         {
           Console.WriteLine($";;;Error while sending {amount} events to elasticsearch");

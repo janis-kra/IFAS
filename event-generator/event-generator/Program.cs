@@ -41,6 +41,7 @@ namespace event_generator
         EventStoreTransaction transaction = conn.StartTransactionAsync(stream, ExpectedVersion.Any).Result;
         var eventData = new EventData[size < TRANSACTION_SIZE ? size : TRANSACTION_SIZE];
         var rnd = new Random();
+        var now = DateTime.Now;
 
         for (var i = 0; i < size; i++)
         {
@@ -50,25 +51,18 @@ namespace event_generator
             double progress = i * 100 / size;
             Console.WriteLine($"{progress}%");
           }
-          var now = DateTime.Now.ToUniversalTime();
+          var eventType = "TutorialExperimentParticipated";
           var obj = new
           {
-            click = new
-            {
-              x = (rnd.NextDouble() * 1920),
-              y = (rnd.NextDouble() * 1080)
-            },
-            screen = new
-            {
-              width = 1920,
-              height = 1080
-            },
-            timestamp = now
+            group = rnd.NextDouble() < 0.5 ? "control" : "treatment",
+            decision = rnd.NextDouble() < 0.5 ? "TutorialSkipped" : "TutorialStarted",
+            timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+            user = new { id = "0" }
           };
           string json = JsonConvert.SerializeObject(obj);
-          var evt = new EventData(Guid.NewGuid(), "UserClicked", true,
+          var evt = new EventData(Guid.NewGuid(), eventType, true,
                   Encoding.UTF8.GetBytes(json),
-                  Encoding.UTF8.GetBytes("some metadata"));
+                  null);
 
           eventData[i % TRANSACTION_SIZE] = evt;
         }
