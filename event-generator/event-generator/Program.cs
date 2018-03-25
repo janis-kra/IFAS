@@ -22,7 +22,7 @@ namespace event_generator
       var size = Int32.Parse(Environment.GetEnvironmentVariable("EXPERIMENT_SIZE") ?? "150");
       string stream = $"performance-{size}";
       var eventstoreName = Environment.GetEnvironmentVariable("EVENTSTORE_NAME") ?? "localhost";
-      var liveBufferSize = Int32.Parse(Environment.GetEnvironmentVariable("LIFE_BUFFER_SIZE") ?? "500");
+      var liveBufferSize = Int32.Parse(Environment.GetEnvironmentVariable("LIVE_BUFFER_SIZE") ?? "500");
       var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "500");
       var readBatch = Int32.Parse(Environment.GetEnvironmentVariable("READ_BATCH") ?? "40");
       string pw = Environment.GetEnvironmentVariable("PW") ?? "changeit";

@@ -12,8 +12,8 @@ do
     then
       size=100000
     else
-      size=200000
-    fi      
+      size=150000
+    fi
 
     for (( j=0; j<=9; j++ ))
     do
