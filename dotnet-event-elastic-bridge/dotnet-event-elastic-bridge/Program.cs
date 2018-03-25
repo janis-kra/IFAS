@@ -70,10 +70,14 @@ namespace dotneteventelasticbridge
       var settings = EventStore.ClientAPI.ConnectionSettings.Create().SetDefaultUserCredentials(credentials);//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
 
-      if (group != "performance")
+        // wait X seconds before connecting s.t. eventstore and elastic have time to spin up
+      if (group == "performance")
       {
-        // wait 30 seconds before connecting s.t. eventstore and elastic have time to spin up
-        Thread.Sleep(30 * 1000); // 30 * 1000ms = 30s
+        Thread.Sleep(5 * 1000);
+      }
+      else
+      {
+        Thread.Sleep(30 * 1000);
       }
 
       var start = ToTimestamp(DateTime.UtcNow);
