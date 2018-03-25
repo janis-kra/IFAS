@@ -73,7 +73,7 @@ namespace dotneteventelasticbridge
         // wait X seconds before connecting s.t. eventstore and elastic have time to spin up
       if (group == "performance")
       {
-        Thread.Sleep(5 * 1000);
+        Thread.Sleep(10 * 1000);
       }
       else
       {
