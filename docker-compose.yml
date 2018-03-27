@@ -3,7 +3,6 @@ services:
 
   eventstore:
     image: eventstore/eventstore:release-4.1.0
-    container_name: eventstore
     ports:
       - 2113:2113
     networks:
@@ -11,7 +10,6 @@ services:
 
   # eventstore-1:
   #   image: eventstore/eventstore:release-4.1.0
-  #   container_name: eventstore-1
   #   environment:
   #     - EVENTSTORE_CLUSTER_SIZE=3
   #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
@@ -22,7 +20,6 @@ services:
 
   # eventstore-2:
   #   image: eventstore/eventstore:release-4.1.0
-  #   container_name: eventstore-2
   #   environment:
   #     - EVENTSTORE_CLUSTER_SIZE=3
   #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
@@ -33,7 +30,6 @@ services:
 
   # eventstore-3:
   #   image: eventstore/eventstore:release-4.1.0
-  #   container_name: eventstore-3
   #   environment:
   #     - EVENTSTORE_CLUSTER_SIZE=3
   #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
@@ -44,7 +40,6 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
-    container_name: elasticsearch
     command: elasticsearch
     ulimits:
       memlock:
@@ -60,7 +55,6 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:6.1.1
-    container_name: kibana
     ports:
       - 127.0.0.1:5601:5601
     volumes:
@@ -73,20 +67,18 @@ services:
 
   evt-es-bridge:
     build: dotnet-event-elastic-bridge
-    container_name: evt-es-bridge
     environment:
       - STREAM_URL=eventstore
       - ELASTIC_NAME=elasticsearch
       - EVENTSTORE_NAME=eventstore
       - USER=admin
-      - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
       - BUFFER_SIZE=100
+      - PW=changeit
     networks:
       - feedback-net
 
   nginx:
     image: nginx:1.13
-    container_name: nginx
     ports:
       - 6601:6601
     volumes:
@@ -96,11 +88,10 @@ services:
 
   event-generator:
     build: event-generator
-    container_name: event-generator
     environment:
       - EVENTSTORE_NAME=eventstore
       - USER=admin
-      - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
+      - PW=changeit
     networks:
       - feedback-net
 
