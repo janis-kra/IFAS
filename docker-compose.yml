@@ -80,7 +80,7 @@ services:
       - EVENTSTORE_NAME=eventstore
       - USER=admin
       - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
-      - BUFFER_SIZE=2560
+      - BUFFER_SIZE=100
     networks:
       - feedback-net
 
