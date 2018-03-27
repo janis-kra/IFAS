@@ -50,7 +50,7 @@ namespace dotneteventelasticbridge
       var eventstoreName = Environment.GetEnvironmentVariable("EVENTSTORE_NAME") ?? "localhost";
       var elasticsearchIndex = Environment.GetEnvironmentVariable("ES_INDEX") ?? stream;
       var delay = Int32.Parse(Environment.GetEnvironmentVariable("DELAY") ?? "1000");
-      var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "10");
+      var bufferSize = Int32.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE") ?? "2560");
       var password = Environment.GetEnvironmentVariable("PW") ?? "changeit";
       expectedAmount = Int32.Parse(Environment.GetEnvironmentVariable("EXPECTED_AMOUNT") ?? "0");
       if (expectedAmount == 0)
