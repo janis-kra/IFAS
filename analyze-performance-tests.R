@@ -65,11 +65,11 @@ plotAmount <- function (d, x.limit, x.intervals) {
   # todo: use which ncol value for face_wrap? 2 seems good
 }
 
-plotTotalDuration <- function (d, y.limit, y.intervals) {
+plotTotalDuration <- function (d, breaks) {
   ggplot(d, aes(x=config, y=t, group = config)) +
     geom_boxplot() +
     scale_x_continuous(name = "Configuration", breaks = c(0:10)) +
-    scale_y_log10(name = "Duration (s)", breaks = seq(0, y.limit, y.intervals))
+    scale_y_log10(name = "Duration (s)", breaks = breaks)
   # todo konfidenzintervalle anpassen?
   # todo mehr experimente
 }
@@ -85,11 +85,11 @@ ggsave("plots/config-comparison_50k.pdf", device = "pdf")
 plotAmount(subset(results.run0, size == 150000), 375, 30)
 ggsave("plots/config-comparison_150k.pdf", device = "pdf")
 
-plotTotalDuration(subset(results.durations, size == 100000), y.limit = 100, y.intervals = 10)
-ggsave("mean-durations-100k.pdf", device = "pdf")
+plotTotalDuration(subset(results.durations, size == 50000), c(5,10,15,20,25,30,40,50,60,80,100,150,200,300,500))
+ggsave("plots/mean-durations-50k.pdf", device = "pdf")
 
-plotTotalDuration(subset(results.durations, size == 50000), y.limit = 25, y.intervals = 5)
-ggsave("mean-durations-50k.pdf", device = "pdf")
+plotTotalDuration(subset(results.durations, size == 100000), c(10,20,30,40,50,75,100,125,150,200,300,400,500,750,1000))
+ggsave("plots/mean-durations-100k.pdf", device = "pdf")
 
-plotTotalDuration(subset(results.durations, size == 150000), y.limit = 375, y.intervals = 75)
-ggsave("mean-durations-150k.pdf", device = "pdf")
+plotTotalDuration(subset(results.durations, size == 150000), c(10,20,30,40,50,75,100,125,150,200,300,400,500,750,1000,1500))
+ggsave("plots/mean-durations-150k.pdf", device = "pdf")
