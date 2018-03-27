@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.SystemData;
@@ -29,6 +30,8 @@ namespace event_generator
       //uncommet to enable verbose logging in client.
       var settings = ConnectionSettings.Create();//.EnableVerboseLogging().UseConsoleLogger();
       var evtStAddress = new IPEndPoint(Dns.GetHostAddresses(eventstoreName)[0], DEFAULTPORT);
+
+        Thread.Sleep(15 * 1000);
 
       var start = DateTime.Now;
 

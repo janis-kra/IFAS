@@ -17,6 +17,10 @@ do
 
     for (( j=0; j<=9; j++ ))
     do
+      # restart docker containers
+      docker-compose down
+      docker-compose up -d eventstore elasticsearch
+
       factor=$((2**$j))
       number=$((10+$i*10+$j))
       client_buffer=$(($factor*40))
