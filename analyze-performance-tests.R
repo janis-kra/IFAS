@@ -74,7 +74,7 @@ plotTotalDuration <- function (d, breaks) {
   # todo mehr experimente
 }
 
-results.run0 <- subset(results.flat, run == 0)
+results.run0 <- subset(results.flat, run == 14)
 
 plotAmount(subset(results.run0, size == 100000), x.limit = 100, x.intervals = 10)
 ggsave("plots/config-comparison_100k.pdf", device = "pdf")

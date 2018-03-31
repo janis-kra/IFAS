@@ -7,5 +7,6 @@ namespace dotneteventelasticbridge
     {
         public string timestamp { get; set; }
         public WithId user { get; set; }
+        public string AAGroup { get; set; }
     }
 }
