@@ -45,8 +45,6 @@ services:
       memlock:
         soft: -1
         hard: -1
-    ports:
-      - 9200:9200
     environment:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
@@ -74,8 +72,8 @@ services:
       - ELASTIC_NAME=elasticsearch
       - EVENTSTORE_NAME=eventstore
       - USER=admin
+      - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
       - BUFFER_SIZE=100
-      - PW=changeit
     networks:
       - feedback-net
 
@@ -96,7 +94,7 @@ services:
     environment:
       - EVENTSTORE_NAME=eventstore
       - USER=admin
-      - PW=changeit
+      - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
     networks:
       - feedback-net
 
