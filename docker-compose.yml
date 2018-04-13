@@ -6,7 +6,7 @@ services:
     ports:
       - 2113:2113
     networks:
-      - feedback-net
+      - IFAS-net
 
   # eventstore-1:
   #   image: eventstore/eventstore:release-4.1.0
@@ -14,7 +14,7 @@ services:
   #     - EVENTSTORE_CLUSTER_SIZE=3
   #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
   #   networks:
-  #     feedback-net:
+  #     IFAS-net:
   #       aliases:
   #         - eventstore-cluster
 
@@ -24,7 +24,7 @@ services:
   #     - EVENTSTORE_CLUSTER_SIZE=3
   #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
   #   networks:
-  #     feedback-net:
+  #     IFAS-net:
   #       aliases:
   #         - eventstore-cluster
 
@@ -34,7 +34,7 @@ services:
   #     - EVENTSTORE_CLUSTER_SIZE=3
   #     - EVENTSTORE_CLUSTER_DNS=eventstore-cluster
   #   networks:
-  #     feedback-net:
+  #     IFAS-net:
   #       aliases:
   #         - eventstore-cluster
 
@@ -51,7 +51,7 @@ services:
       - elasticdata:/usr/share/elasticsearch/data
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
-      - feedback-net
+      - IFAS-net
 
   kibana:
     image: docker.elastic.co/kibana/kibana:6.1.1
@@ -63,7 +63,7 @@ services:
     environment:
       - cluster.name=docker-cluster
     networks:
-      - feedback-net
+      - IFAS-net
 
   evt-es-bridge:
     build: dotnet-event-elastic-bridge
@@ -75,7 +75,7 @@ services:
       - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
       - BUFFER_SIZE=100
     networks:
-      - feedback-net
+      - IFAS-net
 
   # evt-es-bridge-120mio:
   #   build: dotnet-event-elastic-bridge-120mio
@@ -87,7 +87,7 @@ services:
   #     - PW=changeit
   #     - BUFFER_SIZE=640
   #   networks:
-  #     - feedback-net
+  #     - IFAS-net
 
   event-generator:
     build: event-generator
@@ -96,7 +96,7 @@ services:
       - USER=admin
       - PW=vEeW120SG7pSz4lbJgxCzIZh4KH16M70
     networks:
-      - feedback-net
+      - IFAS-net
 
 volumes:
   elasticdata:
@@ -105,4 +105,4 @@ volumes:
     driver: local
 
 networks:
-  feedback-net:
+  IFAS-net:
