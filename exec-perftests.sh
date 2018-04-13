@@ -23,7 +23,7 @@ do
 
       factor=$((2**$j))
       number=$((10+$i*10+$j))
-      client_buffer=$(($factor*40))
+      client_buffer=640
       buff_size=$(($factor*500))
       live_buff_size=$(($factor*500))
       read_batch=$(($factor*20))

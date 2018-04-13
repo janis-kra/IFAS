@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EventStore.ClientAPI.NetCore" Version="4.0.3-rc" />
+    <PackageReference Include="NEST" Version="6.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Screen.cs" />
+    <Compile Remove="EmptyClass.cs" />
+  </ItemGroup>
+</Project>
