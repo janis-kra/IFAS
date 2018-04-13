@@ -1,19 +1,6 @@
 version: "3.4"
 services:
 
-
-  evt-es-bridge-120mio:
-    build: dotnet-event-elastic-bridge-120mio
-    environment:
-      - STREAM_URL=eventstore
-      - ELASTIC_NAME=elasticsearch
-      - EVENTSTORE_NAME=eventstore
-      - USER=admin
-      - PW=changeit
-      - BUFFER_SIZE=640
-    networks:
-      - feedback-net
-
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     ports:
@@ -92,14 +79,17 @@ services:
     networks:
       - feedback-net
 
-  nginx:
-    image: nginx:1.13
-    ports:
-      - 6601:6601
-    volumes:
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
-    networks:
-      - feedback-net
+  # evt-es-bridge-120mio:
+  #   build: dotnet-event-elastic-bridge-120mio
+  #   environment:
+  #     - STREAM_URL=eventstore
+  #     - ELASTIC_NAME=elasticsearch
+  #     - EVENTSTORE_NAME=eventstore
+  #     - USER=admin
+  #     - PW=changeit
+  #     - BUFFER_SIZE=640
+  #   networks:
+  #     - feedback-net
 
   event-generator:
     build: event-generator
