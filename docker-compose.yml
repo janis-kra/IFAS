@@ -1,6 +1,19 @@
 version: "3.4"
 services:
 
+
+  evt-es-bridge-120mio:
+    build: dotnet-event-elastic-bridge-120mio
+    environment:
+      - STREAM_URL=eventstore
+      - ELASTIC_NAME=elasticsearch
+      - EVENTSTORE_NAME=eventstore
+      - USER=admin
+      - PW=changeit
+      - BUFFER_SIZE=640
+    networks:
+      - feedback-net
+
   eventstore:
     image: eventstore/eventstore:release-4.1.0
     ports:
@@ -45,6 +58,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    ports:
+      - 9200:9200
     environment:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
