@@ -5,6 +5,9 @@ services:
     image: eventstore/eventstore:release-4.1.0
     ports:
       - 2113:2113
+    volumes:
+      - eventstoredata:/var/lib/eventstore
+      - eventstoreconfig:/etc/eventstore
     networks:
       - IFAS-net
 
@@ -99,6 +102,10 @@ services:
       - IFAS-net
 
 volumes:
+  eventstoredata:
+    driver: local
+  eventstoreconfig:
+    driver: local
   elasticdata:
     driver: local
   kibanadata:
