@@ -64,7 +64,7 @@ survey.q4 <- data.frame(
   x = seq(1,12),
   y = c(2,2,1,1,1,3,1,1,2,1,1,1)
 )
-f <- c("don't know","blue","grey")
+f <- c("don't know","blue","green")
 survey.q5 <- data.frame(
   x = factor(f, levels=f),
   y = c(perc(8,12),perc(3,12),perc(1,12))
@@ -96,9 +96,9 @@ survey.q4.results <- ggplot(data=survey.q4, aes(x=x, y=y, fill=x)) +
   scale_fill_manual(values=fullCbbPalette[9]) +
   ggtitle("How many messages did you send?") +
   guides(fill=FALSE)
-survey.q5.results <- plotAnswer(survey.q5,"What color did the button for starting the tutorial have? Click \"don't know\" if you do not remember.",fullCbbPalette[c(4,6,9)])
+survey.q5.results <- plotAnswer(survey.q5,"What color did the button for starting the tutorial have? Click \"don't know\" if you do not remember.",fullCbbPalette[c(9,6,4)])
 
-pdf("plots/survey.pdf", 10, 14)
+pdf("survey.pdf", 10, 14)
 multiplot(survey.q1.results, survey.q2.results, survey.q3.results, survey.q5.results, survey.q4.results, cols = 1)
 dev.off()
 
