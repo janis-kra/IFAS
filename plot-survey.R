@@ -42,6 +42,7 @@ perc <- function (x,y) {
   (x/y)*100
 }
 
+textsize <- 15
 fullCbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999", "#E69F00", "#56B4E9", "#009E73")
 cbbPalette <- c("#009E73", "#0072B2")
 
@@ -91,14 +92,14 @@ survey.q3.results <- plotAnswer(survey.q3,"Which method for switching channels d
 survey.q4.results <- ggplot(data=survey.q4, aes(x=x, y=y, fill=x)) +
   geom_bar(colour="black", width=.8, fill="#999999", stat="identity") +
   xlab("User") +
-  ylab("Amount of messages") +
-  ylim(c(0, 4)) +
-  scale_fill_manual(values=fullCbbPalette[9]) +
+  ylab("# Messages") +
+  ylim(c(0, 4), breaks = NULL) +
+  scale_x_continuous(breaks = seq(1,12)) +
   ggtitle("How many messages did you send?") +
   guides(fill=FALSE)
-survey.q5.results <- plotAnswer(survey.q5,"What color did the button for starting the tutorial have? Click \"don't know\" if you do not remember.",fullCbbPalette[c(9,6,4)])
+survey.q5.results <- plotAnswer(survey.q5,"What color did the button for starting the tutorial have?\nClick \"don't know\" if you do not remember.",fullCbbPalette[c(9,6,4)])
 
-pdf("survey.pdf", 10, 14)
+pdf("survey.pdf", width = 8, height = 8)
 multiplot(survey.q1.results, survey.q2.results, survey.q3.results, survey.q5.results, survey.q4.results, cols = 1)
 dev.off()
 
